@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Heart, Share2, MapPin, Mail, Phone, Globe, Navigation, GraduationCap, BookOpen, Trophy, Building2, Calendar } from "lucide-react";
 import { AppShell } from "@/components/app/AppShell";
 import { AvailabilityRing } from "@/components/app/AvailabilityRing";
-import { getSchool, getRegion, schoolStats } from "@/lib/data";
+import { getSchool, getRegion, schoolStats, type School, type GradeAvailability } from "@/lib/data";
 import { useFavorites } from "@/lib/favorites";
 import { useState } from "react";
 
@@ -83,7 +83,7 @@ function SchoolPage() {
           <div className="rounded-3xl bg-card p-5 shadow-[var(--shadow-card)]">
             <p className="mb-3 font-display text-sm font-semibold">Availability by grade</p>
             <ul className="space-y-3">
-              {school.grades.map((g, i) => {
+              {school.grades.map((g: GradeAvailability, i: number) => {
                 const av = g.capacity - g.enrolled;
                 const pct = Math.round((g.enrolled / g.capacity) * 100);
                 const status = pct < 70 ? "success" : pct < 90 ? "warning" : "destructive";
@@ -128,7 +128,7 @@ function SchoolPage() {
           <Card title="Vision"><p className="text-sm text-muted-foreground">{school.vision}</p></Card>
           <Card title="Facilities" icon={Building2}>
             <div className="flex flex-wrap gap-2">
-              {school.facilities.map((f) => <span key={f} className="rounded-full bg-muted px-3 py-1 text-xs">{f}</span>)}
+              {school.facilities.map((f: string) => <span key={f} className="rounded-full bg-muted px-3 py-1 text-xs">{f}</span>)}
             </div>
           </Card>
         </section>
@@ -138,12 +138,12 @@ function SchoolPage() {
         <section className="mt-5 space-y-4">
           <Card title="Subjects offered" icon={BookOpen}>
             <div className="flex flex-wrap gap-2">
-              {school.subjects.map((s) => <span key={s} className="rounded-full bg-muted px-3 py-1 text-xs">{s}</span>)}
+              {school.subjects.map((s: string) => <span key={s} className="rounded-full bg-muted px-3 py-1 text-xs">{s}</span>)}
             </div>
           </Card>
           <Card title="Extracurricular" icon={Trophy}>
             <div className="flex flex-wrap gap-2">
-              {school.extracurricular.map((s) => <span key={s} className="rounded-full bg-success/10 px-3 py-1 text-xs text-success">{s}</span>)}
+              {school.extracurricular.map((s: string) => <span key={s} className="rounded-full bg-success/10 px-3 py-1 text-xs text-success">{s}</span>)}
             </div>
           </Card>
           <Card title="Admissions" icon={GraduationCap}>
