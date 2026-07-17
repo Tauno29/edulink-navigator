@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Heart, Share2, MapPin, Mail, Phone, Globe, Navigation, GraduationCap, BookOpen, Trophy, Building2, Calendar } from "lucide-react";
 import { AppShell } from "@/components/app/AppShell";
 import { AvailabilityRing } from "@/components/app/AvailabilityRing";
-import { getSchool, getRegion, schoolStats, type School, type GradeAvailability } from "@/lib/data";
+import { getSchool, getRegion, schoolStats, type GradeAvailability } from "@/lib/data";
 import { useFavorites } from "@/lib/favorites";
 import { useState } from "react";
 
