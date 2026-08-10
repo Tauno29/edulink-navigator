@@ -3,6 +3,7 @@ import { ArrowLeft, ChevronRight, Bell, Globe, Moon, LifeBuoy, Info, LogOut, Use
 import { AppShell } from "@/components/app/AppShell";
 import { useEffect, useState } from "react";
 import { useFavorites } from "@/lib/favorites";
+import { REGIONS } from "@/lib/data";
 
 export const Route = createFileRoute("/profile")({ component: ProfilePage });
 
@@ -37,7 +38,7 @@ function ProfilePage() {
 
       <div className="mt-4 grid grid-cols-3 gap-2">
         <MiniStat icon={Heart} value={ids.length} label="Saved" />
-        <MiniStat icon={FileText} value={REGION_COUNT} label="Regions" />
+        <MiniStat icon={FileText} value={REGIONS.length} label="Regions" />
         <MiniStat icon={Bell} value={3} label="Alerts" />
       </div>
 
