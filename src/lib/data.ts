@@ -19,6 +19,16 @@ export type GradeAvailability = {
   capacity: number;
   enrolled: number;
   classes: number;
+  classList: ClassGroup[];
+};
+
+export type ClassGroup = {
+  id: string;
+  name: string;
+  capacity: number;
+  enrolled: number;
+  field: string;
+  teacher: string;
 };
 
 export type School = {
@@ -70,9 +80,28 @@ function mkGrades(seed: number, base: number): GradeAvailability[] {
     const occRate = 0.4 + (((seed * 13 + i * 7) % 60) / 100);
     const enrolled = Math.min(capacity, Math.round(capacity * occRate));
     const classes = Math.max(1, Math.round(capacity / 30));
-    return { grade: g, capacity, enrolled, classes };
+    const senior = i >= 9;
+    const fields = senior ? SENIOR_FIELDS : i >= 8 ? JUNIOR_FIELDS : PRIMARY_FIELDS;
+    const classList: ClassGroup[] = Array.from({ length: classes }, (_, c) => {
+      const cap = Math.round(capacity / classes);
+      const enr = Math.min(cap, Math.round(enrolled / classes) + ((seed + c) % 3) - 1);
+      return {
+        id: `${g}-${c}`,
+        name: `${g.replace("Grade ", "")}${String.fromCharCode(65 + c)}`,
+        capacity: cap,
+        enrolled: Math.max(0, enr),
+        field: fields[(seed + c + i) % fields.length],
+        teacher: TEACHERS[(seed + c) % TEACHERS.length],
+      };
+    });
+    return { grade: g, capacity, enrolled, classes, classList };
   });
 }
+
+const PRIMARY_FIELDS = ["General Education", "Literacy & Numeracy", "Environmental Studies", "Arts & Culture"];
+const JUNIOR_FIELDS = ["General Education", "Pre-Science", "Pre-Commerce", "Technical Skills"];
+const SENIOR_FIELDS = ["Natural Sciences", "Commerce & Accounting", "Humanities & Arts", "Technical & Vocational", "Computer Studies"];
+const TEACHERS = ["Ms. H. Nangolo", "Mr. P. Haufiku", "Mrs. L. Shikongo", "Mr. D. Uirab", "Ms. R. Katjivena", "Mr. S. Mwilima"];
 
 const SCHOOL_NAMES: Record<string, string[]> = {
   erongo: ["Swakopmund Primary School","Walvis Bay Private School","Namib High School","Coastal Secondary","Erongo Combined","Henties Bay Primary","Arandis Secondary","Uis Combined School"],
