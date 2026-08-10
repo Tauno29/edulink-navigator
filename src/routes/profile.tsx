@@ -1,14 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, ChevronRight, Bell, Globe, Moon, LifeBuoy, Info, LogOut, User, Heart, FileText } from "lucide-react";
+import { ArrowLeft, ChevronRight, Bell, Moon, LifeBuoy, Info, LogOut, User, Heart, FileText } from "lucide-react";
 import { AppShell } from "@/components/app/AppShell";
 import { useEffect, useState } from "react";
 import { useFavorites } from "@/lib/favorites";
 import { REGIONS } from "@/lib/data";
+import { useUserName } from "@/lib/user-profile";
 
 export const Route = createFileRoute("/profile")({ component: ProfilePage });
 
 function ProfilePage() {
   const { ids } = useFavorites();
+  const { name } = useUserName();
   const [dark, setDark] = useState(false);
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -29,9 +31,11 @@ function ProfilePage() {
       </div>
 
       <div className="flex items-center gap-4 rounded-3xl bg-card p-5 shadow-[var(--shadow-card)]">
-        <div className="grid h-14 w-14 place-items-center rounded-2xl gradient-hero text-background text-lg font-bold">NN</div>
+        <div className="grid h-14 w-14 place-items-center rounded-2xl gradient-hero text-background text-lg font-bold">
+          {(name || "Ndapewa Nashilongo").split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()}
+        </div>
         <div className="min-w-0 flex-1">
-          <p className="font-display text-lg font-bold">Ndapewa Nashilongo</p>
+          <p className="font-display text-lg font-bold">{name || "Ndapewa Nashilongo"}</p>
           <p className="text-xs text-muted-foreground">Khomas · Windhoek</p>
         </div>
       </div>
@@ -45,7 +49,6 @@ function ProfilePage() {
       <Section title="Preferences">
         <RowToggle icon={Moon} label="Dark mode" value={dark} onChange={setDark} />
         <RowLink icon={Bell} label="Notifications" />
-        <RowLink icon={Globe} label="Language" value="English" />
       </Section>
 
       <Section title="Account">

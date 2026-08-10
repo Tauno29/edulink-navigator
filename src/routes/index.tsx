@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { Search, ArrowUpRight, Sparkles, Building2, Users, TrendingUp, Bell } from "lucide-react";
+import { Search, ArrowUpRight, Sparkles, Building2, Users, TrendingUp, Bell, Sun, Moon, Sunrise, Sunset } from "lucide-react";
 import { AppShell } from "@/components/app/AppShell";
 import { RegionGlyph } from "@/components/app/RegionGlyph";
 import { REGIONS, ANNOUNCEMENTS, SCHOOLS, schoolStats } from "@/lib/data";
 import { useFavorites } from "@/lib/favorites";
+import { greeting, useUserName } from "@/lib/user-profile";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -16,6 +18,16 @@ function Home() {
   const totalCapacity = REGIONS.reduce((a, r) => a + r.totalCapacity, 0);
   const avgOcc = Math.round((REGIONS.reduce((a, r) => a + r.enrolled, 0) / totalCapacity) * 100);
   const { ids } = useFavorites();
+  const { name } = useUserName();
+  const [now, setNow] = useState<Date | null>(null);
+  useEffect(() => {
+    setNow(new Date());
+    const t = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(t);
+  }, []);
+  const g = greeting(now ?? new Date());
+  const GreetIcon = g.period === "morning" ? Sunrise : g.period === "afternoon" ? Sun : g.period === "evening" ? Sunset : Moon;
+  const greetColor = g.period === "night" ? "text-primary" : g.period === "afternoon" ? "text-warning" : "text-accent";
   const favSchools = SCHOOLS.filter((s) => ids.includes(s.id)).slice(0, 3);
   const featured = SCHOOLS.slice(0, 3);
 
@@ -39,7 +51,19 @@ function Home() {
           </Link>
         </div>
         <motion.h1 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="mt-6 text-balance font-display text-[34px] font-bold leading-[1.05]">
-          Good morning.<br />
+          <span className="inline-flex items-center gap-2">
+            <motion.span
+              key={g.period}
+              initial={{ opacity: 0, rotate: -30, scale: 0.7 }}
+              animate={{ opacity: 1, rotate: 0, scale: 1 }}
+              transition={{ type: "spring", stiffness: 220, damping: 16 }}
+              className={greetColor}
+            >
+              <GreetIcon className="h-7 w-7" strokeWidth={2.2} />
+            </motion.span>
+            <span>{g.text}{name ? `, ${name.split(" ")[0]}` : ""}.</span>
+          </span>
+          <br />
           <span className="text-muted-foreground">Find placement across Namibia.</span>
         </motion.h1>
       </header>
