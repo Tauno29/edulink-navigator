@@ -159,15 +159,15 @@ export const SCHOOLS: School[] = REGIONS.flatMap((region) => {
 
 export const NOTIFICATIONS = [
   { id: "1", title: "New spaces available", body: "Swakopmund Primary opened 12 new Grade 3 spaces.", time: "2m ago", type: "availability" as const, unread: true },
-  { id: "2", title: "Application deadline", body: "Windhoek High School applications close Friday.", time: "1h ago", type: "reminder" as const, unread: true },
+  { id: "2", title: "Class capacity update", body: "Windhoek High School added a new Grade 10 Science class.", time: "1h ago", type: "availability" as const, unread: true },
   { id: "3", title: "Ministry announcement", body: "2026 admissions calendar published nationwide.", time: "Yesterday", type: "announcement" as const, unread: false },
   { id: "4", title: "Placement update", body: "Rundu Senior Secondary now accepting Grade 8.", time: "2d ago", type: "availability" as const, unread: false },
-  { id: "5", title: "Application reminder", body: "Complete your saved application at Windhoek Gymnasium.", time: "3d ago", type: "reminder" as const, unread: false },
+  { id: "5", title: "Saved school update", body: "Windhoek Gymnasium released 8 spaces in Grade 9B.", time: "3d ago", type: "reminder" as const, unread: false },
 ];
 
 export const ANNOUNCEMENTS = [
-  { id: "a1", title: "2026 admissions officially open", body: "Applications for the 2026 academic year are now live for all public schools.", tag: "Ministry" },
-  { id: "a2", title: "Digital placement rolls out nationally", body: "EduLink is now the official placement platform across all 14 regions.", tag: "Update" },
+  { id: "a1", title: "2026 class lists published", body: "Class-level enrolment figures for the 2026 academic year are now live for all public schools.", tag: "Ministry" },
+  { id: "a2", title: "Digital placement rolls out nationally", body: "EduSpace is now the official placement platform across all 14 regions.", tag: "Update" },
   { id: "a3", title: "Extra Grade 8 capacity added", body: "Over 3,400 new Grade 8 spaces released across Khomas and Erongo.", tag: "Availability" },
 ];
 
