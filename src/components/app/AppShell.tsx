@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { BottomNav } from "./BottomNav";
+import { Onboarding } from "./Onboarding";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
@@ -15,6 +16,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         {children}
       </motion.main>
       <BottomNav />
+      <Onboarding />
     </div>
   );
 }
