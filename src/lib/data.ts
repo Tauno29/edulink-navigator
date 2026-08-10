@@ -19,6 +19,16 @@ export type GradeAvailability = {
   capacity: number;
   enrolled: number;
   classes: number;
+  classList: ClassGroup[];
+};
+
+export type ClassGroup = {
+  id: string;
+  name: string;
+  capacity: number;
+  enrolled: number;
+  field: string;
+  teacher: string;
 };
 
 export type School = {
@@ -70,9 +80,28 @@ function mkGrades(seed: number, base: number): GradeAvailability[] {
     const occRate = 0.4 + (((seed * 13 + i * 7) % 60) / 100);
     const enrolled = Math.min(capacity, Math.round(capacity * occRate));
     const classes = Math.max(1, Math.round(capacity / 30));
-    return { grade: g, capacity, enrolled, classes };
+    const senior = i >= 9;
+    const fields = senior ? SENIOR_FIELDS : i >= 8 ? JUNIOR_FIELDS : PRIMARY_FIELDS;
+    const classList: ClassGroup[] = Array.from({ length: classes }, (_, c) => {
+      const cap = Math.round(capacity / classes);
+      const enr = Math.min(cap, Math.round(enrolled / classes) + ((seed + c) % 3) - 1);
+      return {
+        id: `${g}-${c}`,
+        name: `${g.replace("Grade ", "")}${String.fromCharCode(65 + c)}`,
+        capacity: cap,
+        enrolled: Math.max(0, enr),
+        field: fields[(seed + c + i) % fields.length],
+        teacher: TEACHERS[(seed + c) % TEACHERS.length],
+      };
+    });
+    return { grade: g, capacity, enrolled, classes, classList };
   });
 }
+
+const PRIMARY_FIELDS = ["General Education", "Literacy & Numeracy", "Environmental Studies", "Arts & Culture"];
+const JUNIOR_FIELDS = ["General Education", "Pre-Science", "Pre-Commerce", "Technical Skills"];
+const SENIOR_FIELDS = ["Natural Sciences", "Commerce & Accounting", "Humanities & Arts", "Technical & Vocational", "Computer Studies"];
+const TEACHERS = ["Ms. H. Nangolo", "Mr. P. Haufiku", "Mrs. L. Shikongo", "Mr. D. Uirab", "Ms. R. Katjivena", "Mr. S. Mwilima"];
 
 const SCHOOL_NAMES: Record<string, string[]> = {
   erongo: ["Swakopmund Primary School","Walvis Bay Private School","Namib High School","Coastal Secondary","Erongo Combined","Henties Bay Primary","Arandis Secondary","Uis Combined School"],
@@ -130,15 +159,15 @@ export const SCHOOLS: School[] = REGIONS.flatMap((region) => {
 
 export const NOTIFICATIONS = [
   { id: "1", title: "New spaces available", body: "Swakopmund Primary opened 12 new Grade 3 spaces.", time: "2m ago", type: "availability" as const, unread: true },
-  { id: "2", title: "Application deadline", body: "Windhoek High School applications close Friday.", time: "1h ago", type: "reminder" as const, unread: true },
+  { id: "2", title: "Class capacity update", body: "Windhoek High School added a new Grade 10 Science class.", time: "1h ago", type: "availability" as const, unread: true },
   { id: "3", title: "Ministry announcement", body: "2026 admissions calendar published nationwide.", time: "Yesterday", type: "announcement" as const, unread: false },
   { id: "4", title: "Placement update", body: "Rundu Senior Secondary now accepting Grade 8.", time: "2d ago", type: "availability" as const, unread: false },
-  { id: "5", title: "Application reminder", body: "Complete your saved application at Windhoek Gymnasium.", time: "3d ago", type: "reminder" as const, unread: false },
+  { id: "5", title: "Saved school update", body: "Windhoek Gymnasium released 8 spaces in Grade 9B.", time: "3d ago", type: "reminder" as const, unread: false },
 ];
 
 export const ANNOUNCEMENTS = [
-  { id: "a1", title: "2026 admissions officially open", body: "Applications for the 2026 academic year are now live for all public schools.", tag: "Ministry" },
-  { id: "a2", title: "Digital placement rolls out nationally", body: "EduLink is now the official placement platform across all 14 regions.", tag: "Update" },
+  { id: "a1", title: "2026 class lists published", body: "Class-level enrolment figures for the 2026 academic year are now live for all public schools.", tag: "Ministry" },
+  { id: "a2", title: "Digital placement rolls out nationally", body: "EduSpace is now the official placement platform across all 14 regions.", tag: "Update" },
   { id: "a3", title: "Extra Grade 8 capacity added", body: "Over 3,400 new Grade 8 spaces released across Khomas and Erongo.", tag: "Availability" },
 ];
 

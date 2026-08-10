@@ -3,6 +3,7 @@ import { ArrowLeft, ChevronRight, Bell, Globe, Moon, LifeBuoy, Info, LogOut, Use
 import { AppShell } from "@/components/app/AppShell";
 import { useEffect, useState } from "react";
 import { useFavorites } from "@/lib/favorites";
+import { REGIONS } from "@/lib/data";
 
 export const Route = createFileRoute("/profile")({ component: ProfilePage });
 
@@ -37,7 +38,7 @@ function ProfilePage() {
 
       <div className="mt-4 grid grid-cols-3 gap-2">
         <MiniStat icon={Heart} value={ids.length} label="Saved" />
-        <MiniStat icon={FileText} value={2} label="Applications" />
+        <MiniStat icon={FileText} value={REGIONS.length} label="Regions" />
         <MiniStat icon={Bell} value={3} label="Alerts" />
       </div>
 
@@ -49,19 +50,19 @@ function ProfilePage() {
 
       <Section title="Account">
         <RowLink icon={User} label="Personal information" />
-        <RowLink icon={FileText} label="Application history" />
+        <RowLink icon={FileText} label="Viewing history" />
         <RowLink icon={Heart} label="Saved schools" value={String(ids.length)} />
       </Section>
 
       <Section title="Support">
         <RowLink icon={LifeBuoy} label="Help center" />
-        <RowLink icon={Info} label="About EduLink" />
+        <RowLink icon={Info} label="About EduSpace" />
       </Section>
 
       <button className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-destructive/10 px-4 py-3.5 text-sm font-semibold text-destructive">
         <LogOut className="h-4 w-4" /> Sign out
       </button>
-      <p className="mt-4 text-center text-[10px] uppercase tracking-widest text-muted-foreground">EduLink Namibia · v1.0</p>
+      <p className="mt-4 text-center text-[10px] uppercase tracking-widest text-muted-foreground">EduSpace Namibia · v1.0</p>
     </AppShell>
   );
 }

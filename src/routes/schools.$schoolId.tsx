@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { motion } from "framer-motion";
-import { ArrowLeft, Heart, Share2, MapPin, Mail, Phone, Globe, Navigation, GraduationCap, BookOpen, Trophy, Building2, Calendar } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowLeft, Heart, Share2, MapPin, Mail, Phone, Globe, Navigation, BookOpen, Trophy, Building2, ChevronDown, Users } from "lucide-react";
 import { AppShell } from "@/components/app/AppShell";
 import { AvailabilityRing } from "@/components/app/AvailabilityRing";
 import { getSchool, getRegion, schoolStats, type GradeAvailability } from "@/lib/data";
@@ -27,6 +27,7 @@ function SchoolPage() {
   const availPct = Math.round(((st.capacity - st.enrolled) / st.capacity) * 100);
   const { has, toggle } = useFavorites();
   const [tab, setTab] = useState<(typeof TABS)[number]>("Availability");
+  const [openGrade, setOpenGrade] = useState<string | null>(null);
 
   return (
     <AppShell>
@@ -81,28 +82,65 @@ function SchoolPage() {
           </div>
 
           <div className="rounded-3xl bg-card p-5 shadow-[var(--shadow-card)]">
-            <p className="mb-3 font-display text-sm font-semibold">Availability by grade</p>
-            <ul className="space-y-3">
+            <p className="font-display text-sm font-semibold">Availability by grade</p>
+            <p className="mb-3 text-[11px] text-muted-foreground">Tap a grade to see each class, its enrolment and field of study.</p>
+            <ul className="space-y-2">
               {school.grades.map((g: GradeAvailability, i: number) => {
                 const av = g.capacity - g.enrolled;
                 const pct = Math.round((g.enrolled / g.capacity) * 100);
                 const status = pct < 70 ? "success" : pct < 90 ? "warning" : "destructive";
                 const color = status === "success" ? "var(--success)" : status === "warning" ? "var(--warning)" : "var(--destructive)";
+                const open = openGrade === g.grade;
                 return (
-                  <li key={g.grade}>
-                    <div className="mb-1 flex items-center justify-between text-xs">
-                      <span className="font-medium">{g.grade}</span>
-                      <span className="tabular-nums text-muted-foreground">{av} space{av === 1 ? "" : "s"} · {g.classes} classes</span>
-                    </div>
-                    <div className="relative h-2 overflow-hidden rounded-full bg-muted">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${pct}%` }}
-                        transition={{ duration: 1, delay: 0.05 * i, ease: [0.22, 1, 0.36, 1] }}
-                        style={{ background: color }}
-                        className="h-full rounded-full"
-                      />
-                    </div>
+                  <li key={g.grade} className={`rounded-2xl transition ${open ? "bg-muted/50 p-3" : "p-0"}`}>
+                    <button
+                      onClick={() => setOpenGrade(open ? null : g.grade)}
+                      aria-expanded={open}
+                      className="w-full text-left"
+                    >
+                      <div className="mb-1 flex items-center justify-between text-xs">
+                        <span className="flex items-center gap-1 font-medium">
+                          {g.grade}
+                          <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
+                        </span>
+                        <span className="tabular-nums text-muted-foreground">{av} space{av === 1 ? "" : "s"} · {g.classes} classes</span>
+                      </div>
+                      <div className="relative h-2 overflow-hidden rounded-full bg-muted">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${pct}%` }}
+                          transition={{ duration: 1, delay: 0.05 * i, ease: [0.22, 1, 0.36, 1] }}
+                          style={{ background: color }}
+                          className="h-full rounded-full"
+                        />
+                      </div>
+                    </button>
+                    <AnimatePresence initial={false}>
+                      {open && (
+                        <motion.ul
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                          className="overflow-hidden"
+                        >
+                          <div className="mt-3 space-y-2">
+                            {g.classList.map((c) => (
+                              <div key={c.id} className="rounded-xl bg-card px-3 py-2.5 shadow-[var(--shadow-card)]">
+                                <div className="flex items-center justify-between">
+                                  <span className="font-display text-xs font-semibold">Class {c.name}</span>
+                                  <span className="flex items-center gap-1 text-[11px] tabular-nums text-muted-foreground">
+                                    <Users className="h-3 w-3" /> {c.enrolled}/{c.capacity} learners
+                                  </span>
+                                </div>
+                                <p className="mt-1 text-[11px] text-muted-foreground">Field of study · <span className="text-foreground">{c.field}</span></p>
+                                <p className="text-[11px] text-muted-foreground">Class teacher · {c.teacher}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </motion.ul>
+                      )}
+                    </AnimatePresence>
                   </li>
                 );
               })}
@@ -145,15 +183,6 @@ function SchoolPage() {
             <div className="flex flex-wrap gap-2">
               {school.extracurricular.map((s: string) => <span key={s} className="rounded-full bg-success/10 px-3 py-1 text-xs text-success">{s}</span>)}
             </div>
-          </Card>
-          <Card title="Admissions" icon={GraduationCap}>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2"><Calendar className="h-3.5 w-3.5" /> Applications open Jan 15 – Mar 31</li>
-              <li>· Certified birth certificate</li>
-              <li>· Latest report card</li>
-              <li>· Proof of residence</li>
-              <li>· Passport photo</li>
-            </ul>
           </Card>
         </section>
       )}
