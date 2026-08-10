@@ -29,7 +29,7 @@ function Home() {
               <Sparkles className="h-4 w-4" strokeWidth={2.5} />
             </div>
             <div>
-              <p className="text-[11px] uppercase tracking-widest text-muted-foreground">EduLink Namibia</p>
+              <p className="text-[11px] uppercase tracking-widest text-muted-foreground">EduSpace Namibia</p>
               <p className="font-display text-sm font-semibold">Ministry of Education</p>
             </div>
           </div>
