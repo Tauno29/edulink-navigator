@@ -190,8 +190,20 @@ function SchoolPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <button className="rounded-2xl border border-border bg-card px-4 py-3 text-sm font-semibold shadow-[var(--shadow-card)]">Save school</button>
-            <button className="rounded-2xl bg-foreground px-4 py-3 text-sm font-semibold text-background shadow-[var(--shadow-float)]"><Navigation className="mr-1 inline h-4 w-4" /> Get directions</button>
+            <button
+              onClick={() => { toggle(school.id); toast.success(saved ? "Removed from saved" : "School saved"); }}
+              className="rounded-2xl border border-border bg-card px-4 py-3 text-sm font-semibold shadow-[var(--shadow-card)] transition active:scale-[0.98]"
+            >
+              {saved ? "Saved ✓" : "Save school"}
+            </button>
+            <a
+              href={mapsUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-2xl bg-foreground px-4 py-3 text-center text-sm font-semibold text-background shadow-[var(--shadow-float)] transition active:scale-[0.98]"
+            >
+              <Navigation className="mr-1 inline h-4 w-4" /> Get directions
+            </a>
           </div>
         </section>
       )}
@@ -226,18 +238,19 @@ function SchoolPage() {
 
       {tab === "Contact" && (
         <section className="mt-5 space-y-3">
-          <ContactRow icon={Mail} label={school.email} />
-          <ContactRow icon={Phone} label={school.phone} />
-          <ContactRow icon={Globe} label={school.website} />
-          <ContactRow icon={MapPin} label={school.address} />
+          <ContactRow icon={Mail} label={school.email} href={`mailto:${school.email}`} />
+          <ContactRow icon={Phone} label={school.phone} href={`tel:${school.phone.replace(/\s/g, "")}`} />
+          <ContactRow icon={Globe} label={school.website} href={`https://${school.website}`} />
+          <ContactRow icon={MapPin} label={school.address} href={mapsUrl} />
           <div className="rounded-3xl bg-card p-3 shadow-[var(--shadow-card)]">
-            <div className="relative h-40 overflow-hidden rounded-2xl" style={{ background: `linear-gradient(135deg, ${region.color}, oklch(0.22 0.06 265))` }}>
+            <a href={mapsUrl} target="_blank" rel="noreferrer" className="relative block h-40 overflow-hidden rounded-2xl" style={{ background: `linear-gradient(135deg, ${region.color}, oklch(0.22 0.06 265))` }}>
               <div className="absolute inset-0 gradient-mesh opacity-70" />
               <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-white">
                 <div className="grid h-10 w-10 place-items-center rounded-full bg-white/20 backdrop-blur mx-auto"><MapPin className="h-4 w-4" /></div>
                 <p className="mt-2 text-xs">{school.address}</p>
+                <p className="mt-1 text-[10px] uppercase tracking-wider text-white/70">Open in Maps</p>
               </div>
-            </div>
+            </a>
           </div>
           <p className="text-[11px] text-muted-foreground">Principal: {school.principal}</p>
         </section>
@@ -270,11 +283,11 @@ function Card({ title, icon: Icon, children }: { title: string; icon?: any; chil
     </div>
   );
 }
-function ContactRow({ icon: Icon, label }: { icon: any; label: string }) {
+function ContactRow({ icon: Icon, label, href }: { icon: any; label: string; href: string }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl bg-card px-4 py-3 shadow-[var(--shadow-card)]">
+    <a href={href} target="_blank" rel="noreferrer" className="flex items-center gap-3 rounded-2xl bg-card px-4 py-3 shadow-[var(--shadow-card)] transition hover:bg-muted/40 active:scale-[0.99]">
       <div className="grid h-9 w-9 place-items-center rounded-xl bg-muted"><Icon className="h-4 w-4" /></div>
       <span className="min-w-0 truncate text-sm">{label}</span>
-    </div>
+    </a>
   );
 }
