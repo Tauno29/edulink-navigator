@@ -5,7 +5,9 @@ import { AppShell } from "@/components/app/AppShell";
 import { AvailabilityRing } from "@/components/app/AvailabilityRing";
 import { getSchool, getRegion, schoolStats, type GradeAvailability } from "@/lib/data";
 import { useFavorites } from "@/lib/favorites";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { recordSchoolView } from "@/lib/local-state";
 
 export const Route = createFileRoute("/schools/$schoolId")({
   component: SchoolPage,
@@ -13,6 +15,19 @@ export const Route = createFileRoute("/schools/$schoolId")({
     const school = getSchool(params.schoolId);
     if (!school) throw notFound();
     return { school };
+  },
+  head: ({ loaderData }) => {
+    if (!loaderData) return { meta: [{ title: "School unavailable — EduSpace Namibia" }, { name: "robots", content: "noindex" }] };
+    const s = loaderData.school;
+    const desc = `${s.name} in ${s.town} — live class-level placement availability, subjects and contact details.`;
+    return {
+      meta: [
+        { title: `${s.name} — EduSpace Namibia` },
+        { name: "description", content: desc },
+        { property: "og:title", content: `${s.name} — EduSpace Namibia` },
+        { property: "og:description", content: desc },
+      ],
+    };
   },
   errorComponent: ({ error }) => <div className="p-8 text-center">{error.message}</div>,
   notFoundComponent: () => <div className="p-8 text-center">School not found</div>,
@@ -28,6 +43,24 @@ function SchoolPage() {
   const { has, toggle } = useFavorites();
   const [tab, setTab] = useState<(typeof TABS)[number]>("Availability");
   const [openGrade, setOpenGrade] = useState<string | null>(null);
+  const saved = has(school.id);
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${school.name}, ${school.address}, Namibia`)}`;
+
+  useEffect(() => { recordSchoolView(school.id); }, [school.id]);
+
+  const onShare = async () => {
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    try {
+      if (typeof navigator !== "undefined" && navigator.share) {
+        await navigator.share({ title: school.name, text: `${school.name} — placement availability on EduSpace Namibia`, url });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copied to clipboard");
+    } catch {
+      /* share cancelled */
+    }
+  };
 
   return (
     <AppShell>
@@ -35,10 +68,14 @@ function SchoolPage() {
       <div className="mb-4 flex items-center justify-between">
         <Link to="/regions/$regionId" params={{ regionId: region.id }} className="grid h-10 w-10 place-items-center rounded-full glass"><ArrowLeft className="h-4 w-4" /></Link>
         <div className="flex items-center gap-2">
-          <button onClick={() => toggle(school.id)} className="grid h-10 w-10 place-items-center rounded-full glass">
-            <Heart className={`h-4 w-4 ${has(school.id) ? "fill-destructive text-destructive" : ""}`} />
+          <button
+            aria-label={saved ? "Remove from saved" : "Save school"}
+            onClick={() => { toggle(school.id); toast.success(saved ? "Removed from saved" : "School saved"); }}
+            className="grid h-10 w-10 place-items-center rounded-full glass active:scale-95"
+          >
+            <Heart className={`h-4 w-4 ${saved ? "fill-destructive text-destructive" : ""}`} />
           </button>
-          <button className="grid h-10 w-10 place-items-center rounded-full glass"><Share2 className="h-4 w-4" /></button>
+          <button aria-label="Share school" onClick={onShare} className="grid h-10 w-10 place-items-center rounded-full glass active:scale-95"><Share2 className="h-4 w-4" /></button>
         </div>
       </div>
 
