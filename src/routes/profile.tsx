@@ -1,26 +1,38 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, ChevronRight, Bell, Moon, LifeBuoy, Info, LogOut, User, Heart, FileText } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { ArrowLeft, ChevronRight, Bell, LifeBuoy, Info, RotateCcw, User, Heart, Clock, Check, X } from "lucide-react";
 import { AppShell } from "@/components/app/AppShell";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { toast } from "sonner";
 import { useFavorites } from "@/lib/favorites";
-import { REGIONS } from "@/lib/data";
+import { NOTIFICATIONS, REGIONS, SCHOOLS } from "@/lib/data";
 import { useUserName } from "@/lib/user-profile";
+import { clearAllLocalData, useReadNotifications, useRecentSchools } from "@/lib/local-state";
 
-export const Route = createFileRoute("/profile")({ component: ProfilePage });
+export const Route = createFileRoute("/profile")({
+  head: () => ({
+    meta: [
+      { title: "Your profile — EduSpace Namibia" },
+      { name: "description", content: "Manage your name, saved schools, viewing history and notification preferences on EduSpace Namibia." },
+      { property: "og:title", content: "Your profile — EduSpace Namibia" },
+      { property: "og:description", content: "Manage your saved schools and viewing history on EduSpace Namibia." },
+    ],
+  }),
+  component: ProfilePage,
+});
 
 function ProfilePage() {
   const { ids } = useFavorites();
-  const { name } = useUserName();
-  const [dark, setDark] = useState(false);
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    const isDark = document.documentElement.classList.contains("dark");
-    setDark(isDark);
-  }, []);
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    document.documentElement.classList.toggle("dark", dark);
-  }, [dark]);
+  const { name, setName } = useUserName();
+  const { isRead } = useReadNotifications();
+  const { ids: recent, clear: clearRecent } = useRecentSchools();
+  const navigate = useNavigate();
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState("");
+  const [panel, setPanel] = useState<"history" | "help" | "about" | null>(null);
+
+  const unread = NOTIFICATIONS.filter((n) => n.unread && !isRead(n.id)).length;
+  const recentSchools = recent.map((id) => SCHOOLS.find((s) => s.id === id)).filter(Boolean);
+  const display = name || "Guest";
 
   return (
     <AppShell>
@@ -31,43 +43,115 @@ function ProfilePage() {
       </div>
 
       <div className="flex items-center gap-4 rounded-3xl bg-card p-5 shadow-[var(--shadow-card)]">
-        <div className="grid h-14 w-14 place-items-center rounded-2xl gradient-hero text-background text-lg font-bold">
-          {(name || "Ndapewa Nashilongo").split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()}
+        <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl gradient-hero text-lg font-bold text-background">
+          {display.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="font-display text-lg font-bold">{name || "Ndapewa Nashilongo"}</p>
-          <p className="text-xs text-muted-foreground">Khomas · Windhoek</p>
+          {editing ? (
+            <div className="flex items-center gap-2">
+              <input
+                autoFocus
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") { setName(draft.trim()); setEditing(false); toast.success("Name updated"); }
+                  if (e.key === "Escape") setEditing(false);
+                }}
+                placeholder="Your name"
+                className="min-w-0 flex-1 rounded-xl bg-muted px-3 py-2 text-sm outline-none ring-ring/40 focus:ring-2"
+              />
+              <button
+                aria-label="Save name"
+                onClick={() => { setName(draft.trim()); setEditing(false); toast.success("Name updated"); }}
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-success text-success-foreground"
+              ><Check className="h-4 w-4" /></button>
+              <button aria-label="Cancel" onClick={() => setEditing(false)} className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-muted"><X className="h-4 w-4" /></button>
+            </div>
+          ) : (
+            <>
+              <p className="truncate font-display text-lg font-bold">{display}</p>
+              <p className="text-xs text-muted-foreground">Saved on this device</p>
+            </>
+          )}
         </div>
       </div>
 
       <div className="mt-4 grid grid-cols-3 gap-2">
-        <MiniStat icon={Heart} value={ids.length} label="Saved" />
-        <MiniStat icon={FileText} value={REGIONS.length} label="Regions" />
-        <MiniStat icon={Bell} value={3} label="Alerts" />
+        <MiniStat icon={Heart} value={ids.length} label="Saved" onClick={() => navigate({ to: "/favourites" })} />
+        <MiniStat icon={Clock} value={recentSchools.length} label="Viewed" onClick={() => setPanel(panel === "history" ? null : "history")} />
+        <MiniStat icon={Bell} value={unread} label="Alerts" onClick={() => navigate({ to: "/notifications" })} />
       </div>
 
-      <Section title="Preferences">
-        <RowToggle icon={Moon} label="Dark mode" value={dark} onChange={setDark} />
-        <RowLink icon={Bell} label="Notifications" />
+      <Section title="Account">
+        <RowLink icon={User} label="Personal information" onClick={() => { setDraft(name); setEditing(true); }} />
+        <RowLink icon={Clock} label="Viewing history" value={String(recentSchools.length)} onClick={() => setPanel(panel === "history" ? null : "history")} />
+        <RowLink icon={Heart} label="Saved schools" value={String(ids.length)} onClick={() => navigate({ to: "/favourites" })} />
+        <RowLink icon={Bell} label="Notifications" value={unread ? `${unread} new` : "All read"} onClick={() => navigate({ to: "/notifications" })} />
       </Section>
 
-      <Section title="Account">
-        <RowLink icon={User} label="Personal information" />
-        <RowLink icon={FileText} label="Viewing history" />
-        <RowLink icon={Heart} label="Saved schools" value={String(ids.length)} />
-      </Section>
+      {panel === "history" && (
+        <div className="mt-2 rounded-2xl bg-card p-3 shadow-[var(--shadow-card)]">
+          {recentSchools.length === 0 ? (
+            <p className="px-1 py-3 text-center text-xs text-muted-foreground">No schools viewed yet.</p>
+          ) : (
+            <>
+              <ul className="space-y-1">
+                {recentSchools.map((s) => (
+                  <li key={s!.id}>
+                    <Link to="/schools/$schoolId" params={{ schoolId: s!.id }} className="flex items-center justify-between rounded-xl px-2 py-2 text-sm hover:bg-muted/60">
+                      <span className="truncate">{s!.name}</span>
+                      <span className="ml-2 shrink-0 text-[11px] text-muted-foreground">{REGIONS.find((r) => r.id === s!.regionId)?.name}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <button onClick={() => { clearRecent(); toast.success("Viewing history cleared"); }} className="mt-2 w-full rounded-xl bg-muted px-3 py-2 text-xs font-medium">Clear history</button>
+            </>
+          )}
+        </div>
+      )}
 
       <Section title="Support">
-        <RowLink icon={LifeBuoy} label="Help center" />
-        <RowLink icon={Info} label="About EduSpace" />
+        <RowLink icon={LifeBuoy} label="Help centre" onClick={() => setPanel(panel === "help" ? null : "help")} />
+        <RowLink icon={Info} label="About EduSpace" onClick={() => setPanel(panel === "about" ? null : "about")} />
       </Section>
 
-      <button className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-destructive/10 px-4 py-3.5 text-sm font-semibold text-destructive">
-        <LogOut className="h-4 w-4" /> Sign out
+      {panel === "help" && (
+        <Panel>
+          <p className="font-semibold text-foreground">How do I find open spaces?</p>
+          <p>Open Search, pick a grade and region, then switch on “Available only”.</p>
+          <p className="mt-3 font-semibold text-foreground">What does a class card show?</p>
+          <p>Tap any grade on a school page to see each class, its enrolment, field of study and class teacher.</p>
+          <p className="mt-3 font-semibold text-foreground">Still stuck?</p>
+          <a href="mailto:support@eduspace.edu.na" className="text-success underline">support@eduspace.edu.na</a>
+        </Panel>
+      )}
+
+      {panel === "about" && (
+        <Panel>
+          <p>EduSpace Namibia shows school placement availability across all 14 regions, down to individual class level.</p>
+          <p className="mt-2">Everything you save — your name, saved schools and viewing history — stays on this device.</p>
+        </Panel>
+      )}
+
+      <button
+        onClick={() => {
+          if (typeof window !== "undefined" && !window.confirm("Reset EduSpace on this device? Your name, saved schools and history will be removed.")) return;
+          clearAllLocalData();
+          toast.success("App data reset");
+          if (typeof window !== "undefined") window.location.href = "/";
+        }}
+        className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-destructive/10 px-4 py-3.5 text-sm font-semibold text-destructive"
+      >
+        <RotateCcw className="h-4 w-4" /> Reset app data
       </button>
       <p className="mt-4 text-center text-[10px] uppercase tracking-widest text-muted-foreground">EduSpace Namibia · v1.0</p>
     </AppShell>
   );
+}
+
+function Panel({ children }: { children: React.ReactNode }) {
+  return <div className="mt-2 rounded-2xl bg-card p-4 text-xs leading-relaxed text-muted-foreground shadow-[var(--shadow-card)]">{children}</div>;
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -78,9 +162,10 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     </section>
   );
 }
-function RowLink({ icon: Icon, label, value }: { icon: any; label: string; value?: string }) {
+
+function RowLink({ icon: Icon, label, value, onClick }: { icon: any; label: string; value?: string; onClick: () => void }) {
   return (
-    <button className="flex w-full items-center gap-3 border-b border-border/60 px-4 py-3.5 text-left last:border-0 hover:bg-muted/50">
+    <button onClick={onClick} className="flex w-full items-center gap-3 border-b border-border/60 px-4 py-3.5 text-left transition-colors last:border-0 hover:bg-muted/50 active:bg-muted">
       <div className="grid h-9 w-9 place-items-center rounded-xl bg-muted"><Icon className="h-4 w-4" /></div>
       <span className="flex-1 text-sm font-medium">{label}</span>
       {value && <span className="text-xs text-muted-foreground">{value}</span>}
@@ -88,23 +173,13 @@ function RowLink({ icon: Icon, label, value }: { icon: any; label: string; value
     </button>
   );
 }
-function RowToggle({ icon: Icon, label, value, onChange }: { icon: any; label: string; value: boolean; onChange: (v: boolean) => void }) {
+
+function MiniStat({ icon: Icon, value, label, onClick }: { icon: any; value: number | string; label: string; onClick: () => void }) {
   return (
-    <div className="flex items-center gap-3 border-b border-border/60 px-4 py-3.5 last:border-0">
-      <div className="grid h-9 w-9 place-items-center rounded-xl bg-muted"><Icon className="h-4 w-4" /></div>
-      <span className="flex-1 text-sm font-medium">{label}</span>
-      <button onClick={() => onChange(!value)} className={`relative h-6 w-11 rounded-full transition-colors ${value ? "bg-success" : "bg-muted-foreground/30"}`}>
-        <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${value ? "translate-x-5" : "translate-x-0.5"}`} />
-      </button>
-    </div>
-  );
-}
-function MiniStat({ icon: Icon, value, label }: { icon: any; value: number | string; label: string }) {
-  return (
-    <div className="rounded-2xl bg-card p-3 shadow-[var(--shadow-card)]">
+    <button onClick={onClick} className="rounded-2xl bg-card p-3 text-left shadow-[var(--shadow-card)] transition active:scale-[0.98]">
       <Icon className="h-3.5 w-3.5 text-muted-foreground" />
       <p className="mt-2 font-display text-lg font-bold tabular-nums">{value}</p>
       <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
-    </div>
+    </button>
   );
 }

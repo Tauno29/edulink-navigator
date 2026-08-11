@@ -3,12 +3,21 @@ import { motion } from "framer-motion";
 import { Search, ArrowUpRight, Sparkles, Building2, Users, TrendingUp, Bell, Sun, Moon, Sunrise, Sunset } from "lucide-react";
 import { AppShell } from "@/components/app/AppShell";
 import { RegionGlyph } from "@/components/app/RegionGlyph";
-import { REGIONS, ANNOUNCEMENTS, SCHOOLS, schoolStats } from "@/lib/data";
+import { REGIONS, ANNOUNCEMENTS, NOTIFICATIONS, SCHOOLS, schoolStats } from "@/lib/data";
 import { useFavorites } from "@/lib/favorites";
+import { useReadNotifications } from "@/lib/local-state";
 import { greeting, useUserName } from "@/lib/user-profile";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "EduSpace Namibia — Live school placement availability" },
+      { name: "description", content: "See open school spaces across all 14 regions of Namibia, down to class level: enrolment, field of study and class teacher." },
+      { property: "og:title", content: "EduSpace Namibia — Live school placement availability" },
+      { property: "og:description", content: "Open school spaces across all 14 regions of Namibia, down to class level." },
+    ],
+  }),
   component: Home,
 });
 
@@ -19,6 +28,8 @@ function Home() {
   const avgOcc = Math.round((REGIONS.reduce((a, r) => a + r.enrolled, 0) / totalCapacity) * 100);
   const { ids } = useFavorites();
   const { name } = useUserName();
+  const { isRead } = useReadNotifications();
+  const unread = NOTIFICATIONS.filter((n) => n.unread && !isRead(n.id)).length;
   const [now, setNow] = useState<Date | null>(null);
   useEffect(() => {
     setNow(new Date());
@@ -47,7 +58,7 @@ function Home() {
           </div>
           <Link to="/notifications" className="relative grid h-10 w-10 place-items-center rounded-full glass">
             <Bell className="h-4 w-4" />
-            <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-success ring-2 ring-background" />
+            {unread > 0 && <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-success ring-2 ring-background" />}
           </Link>
         </div>
         <motion.h1 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="mt-6 text-balance font-display text-[34px] font-bold leading-[1.05]">
