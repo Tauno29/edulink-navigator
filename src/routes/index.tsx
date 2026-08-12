@@ -37,6 +37,7 @@ function Home() {
     return () => clearInterval(t);
   }, []);
   const g = greeting(now ?? new Date());
+  const hydrated = now !== null;
   const GreetIcon = g.period === "morning" ? Sunrise : g.period === "afternoon" ? Sun : g.period === "evening" ? Sunset : Moon;
   const greetColor = g.period === "night" ? "text-primary" : g.period === "afternoon" ? "text-warning" : "text-accent";
   const favSchools = SCHOOLS.filter((s) => ids.includes(s.id)).slice(0, 3);
@@ -63,16 +64,20 @@ function Home() {
         </div>
         <motion.h1 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="mt-6 text-balance font-display text-[34px] font-bold leading-[1.05]">
           <span className="inline-flex items-center gap-2">
-            <motion.span
-              key={g.period}
-              initial={{ opacity: 0, rotate: -30, scale: 0.7 }}
-              animate={{ opacity: 1, rotate: 0, scale: 1 }}
-              transition={{ type: "spring", stiffness: 220, damping: 16 }}
-              className={greetColor}
-            >
-              <GreetIcon className="h-7 w-7" strokeWidth={2.2} />
-            </motion.span>
-            <span>{g.text}{name ? `, ${name.split(" ")[0]}` : ""}.</span>
+            <span className="inline-block h-7 w-7">
+              {hydrated && (
+                <motion.span
+                  key={g.period}
+                  initial={{ opacity: 0, rotate: -30, scale: 0.7 }}
+                  animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                  transition={{ type: "spring", stiffness: 220, damping: 16 }}
+                  className={greetColor}
+                >
+                  <GreetIcon className="h-7 w-7" strokeWidth={2.2} />
+                </motion.span>
+              )}
+            </span>
+            <span>{hydrated ? g.text : "Hello"}{name ? `, ${name.split(" ")[0]}` : ""}.</span>
           </span>
           <br />
           <span className="text-muted-foreground">Find placement across Namibia.</span>
