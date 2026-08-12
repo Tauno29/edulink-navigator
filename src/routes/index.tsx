@@ -37,6 +37,7 @@ function Home() {
     return () => clearInterval(t);
   }, []);
   const g = greeting(now ?? new Date());
+  const hydrated = now !== null;
   const GreetIcon = g.period === "morning" ? Sunrise : g.period === "afternoon" ? Sun : g.period === "evening" ? Sunset : Moon;
   const greetColor = g.period === "night" ? "text-primary" : g.period === "afternoon" ? "text-warning" : "text-accent";
   const favSchools = SCHOOLS.filter((s) => ids.includes(s.id)).slice(0, 3);
