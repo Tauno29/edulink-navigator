@@ -186,3 +186,46 @@ export function schoolStats(s: School) {
   const enrolled = s.grades.reduce((a, g) => a + g.enrolled, 0);
   return { capacity, enrolled, available: capacity - enrolled, occupancy: Math.round((enrolled / capacity) * 100) };
 }
+
+export const GRADES = GRADE_LIST;
+export const FIELDS = Array.from(
+  new Set([...PRIMARY_FIELDS, ...JUNIOR_FIELDS, ...SENIOR_FIELDS]),
+).sort();
+
+/** Pre-computed, immutable search index so filtering never re-walks nested class lists. */
+export type SchoolIndexEntry = {
+  school: School;
+  regionId: string;
+  regionName: string;
+  regionColor: string;
+  text: string;
+  available: number;
+  capacity: number;
+  enrolled: number;
+  /** grade -> open seats */
+  gradeOpen: Record<string, number>;
+  fields: Set<string>;
+};
+
+export const SCHOOL_INDEX: SchoolIndexEntry[] = SCHOOLS.map((school) => {
+  const region = REGIONS.find((r) => r.id === school.regionId)!;
+  const stats = schoolStats(school);
+  const gradeOpen: Record<string, number> = {};
+  const fields = new Set<string>();
+  for (const g of school.grades) {
+    gradeOpen[g.grade] = g.capacity - g.enrolled;
+    for (const c of g.classList) fields.add(c.field);
+  }
+  return {
+    school,
+    regionId: school.regionId,
+    regionName: region.name,
+    regionColor: region.color,
+    text: `${school.name} ${school.town} ${region.name} ${school.type}`.toLowerCase(),
+    available: stats.available,
+    capacity: stats.capacity,
+    enrolled: stats.enrolled,
+    gradeOpen,
+    fields,
+  };
+});
