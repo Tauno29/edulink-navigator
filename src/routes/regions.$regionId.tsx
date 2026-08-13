@@ -21,7 +21,7 @@ function RegionPage() {
   const { region } = Route.useLoaderData();
   const schools = schoolsByRegion(region.id);
   const available = region.totalCapacity - region.enrolled;
-  const occ = Math.round((region.enrolled / region.totalCapacity) * 100);
+  const occ = region.totalCapacity > 0 ? Math.round((region.enrolled / region.totalCapacity) * 100) : 0;
   const [q, setQ] = useState("");
   const filtered = schools.filter((s) => s.name.toLowerCase().includes(q.toLowerCase()));
 
@@ -37,7 +37,7 @@ function RegionPage() {
         <RegionGlyph color={region.color} letter={region.name[0]} />
         <div className="min-w-0">
           <h1 className="truncate font-display text-2xl font-bold">{region.name} Region</h1>
-          <p className="text-xs text-muted-foreground">{region.totalSchools} schools · {available.toLocaleString()} spaces</p>
+          <p className="text-xs text-muted-foreground">{region.totalSchools > 0 ? `${region.totalSchools} schools · ${available.toLocaleString()} spaces` : "No schools listed yet"}</p>
         </div>
       </div>
 
@@ -109,7 +109,11 @@ function RegionPage() {
               </li>
             );
           })}
-          {filtered.length === 0 && <p className="rounded-2xl bg-card p-6 text-center text-sm text-muted-foreground">No schools match your search.</p>}
+          {filtered.length === 0 && (
+            <p className="rounded-2xl bg-card p-6 text-center text-sm text-muted-foreground">
+              {schools.length === 0 ? "No schools listed yet for this region." : "No schools match your search."}
+            </p>
+          )}
         </ul>
       </section>
     </AppShell>
