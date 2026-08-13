@@ -25,7 +25,7 @@ function Home() {
   const totalSchools = REGIONS.reduce((a, r) => a + r.totalSchools, 0);
   const totalAvailable = REGIONS.reduce((a, r) => a + (r.totalCapacity - r.enrolled), 0);
   const totalCapacity = REGIONS.reduce((a, r) => a + r.totalCapacity, 0);
-  const avgOcc = Math.round((REGIONS.reduce((a, r) => a + r.enrolled, 0) / totalCapacity) * 100);
+  const avgOcc = totalCapacity > 0 ? Math.round((REGIONS.reduce((a, r) => a + r.enrolled, 0) / totalCapacity) * 100) : 0;
   const { ids } = useFavorites();
   const { name } = useUserName();
   const { isRead } = useReadNotifications();
@@ -100,11 +100,11 @@ function Home() {
 
       {/* Regions */}
       <section className="mt-8">
-        <SectionHeader title="All 14 Regions" hint={`Avg. occupancy ${avgOcc}%`} />
+        <SectionHeader title="All 14 Regions" hint={totalCapacity > 0 ? `Avg. occupancy ${avgOcc}%` : "Awaiting data"} />
         <ul className="mt-3 space-y-2">
           {REGIONS.map((r, i) => {
             const available = r.totalCapacity - r.enrolled;
-            const occ = Math.round((r.enrolled / r.totalCapacity) * 100);
+            const occ = r.totalCapacity > 0 ? Math.round((r.enrolled / r.totalCapacity) * 100) : 0;
             return (
               <motion.li key={r.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.02 * i }}>
                 <Link
@@ -115,11 +115,11 @@ function Home() {
                   <RegionGlyph color={r.color} letter={r.name[0]} />
                   <div className="min-w-0">
                     <p className="truncate font-display text-[15px] font-semibold">{r.name} Region</p>
-                    <p className="truncate text-xs text-muted-foreground">{r.totalSchools} schools · {r.capital}</p>
+                    <p className="truncate text-xs text-muted-foreground">{r.totalSchools > 0 ? `${r.totalSchools} schools · ` : ""}{r.capital}</p>
                   </div>
                   <div className="flex flex-col items-end">
-                    <p className="font-display text-sm font-bold tabular-nums" style={{ color: r.color }}>{available.toLocaleString()}</p>
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{occ}% full</p>
+                    <p className="font-display text-sm font-bold tabular-nums" style={{ color: r.color }}>{r.totalSchools > 0 ? available.toLocaleString() : "—"}</p>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{r.totalSchools > 0 ? `${occ}% full` : "No data"}</p>
                   </div>
                 </Link>
               </motion.li>
@@ -129,6 +129,7 @@ function Home() {
       </section>
 
       {/* Featured */}
+      {featured.length > 0 && (
       <section className="mt-8">
         <SectionHeader title="Featured schools" hint="Editor's pick" />
         <div className="mt-3 -mx-5 overflow-x-auto px-5">
@@ -155,6 +156,7 @@ function Home() {
           </div>
         </div>
       </section>
+      )}
 
       {/* Favourites */}
       {favSchools.length > 0 && (
@@ -183,6 +185,9 @@ function Home() {
       {/* Announcements */}
       <section className="mt-8">
         <SectionHeader title="Latest announcements" hint="Ministry" />
+        {ANNOUNCEMENTS.length === 0 && (
+          <p className="mt-3 rounded-2xl bg-card p-6 text-center text-sm text-muted-foreground shadow-[var(--shadow-card)]">No announcements yet. Ministry updates will appear here.</p>
+        )}
         <ul className="mt-3 space-y-2">
           {ANNOUNCEMENTS.map((a) => (
             <li key={a.id} className="rounded-2xl bg-card p-4 shadow-[var(--shadow-card)]">
