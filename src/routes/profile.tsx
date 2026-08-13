@@ -1,12 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, ChevronRight, Bell, LifeBuoy, Info, RotateCcw, User, Heart, Clock, Check, X } from "lucide-react";
+import { ArrowLeft, ChevronRight, Bell, LifeBuoy, Info, User, Heart, Clock, Check, X } from "lucide-react";
 import { AppShell } from "@/components/app/AppShell";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useFavorites } from "@/lib/favorites";
 import { NOTIFICATIONS, REGIONS, SCHOOLS } from "@/lib/data";
 import { useUserName } from "@/lib/user-profile";
-import { clearAllLocalData, useReadNotifications, useRecentSchools } from "@/lib/local-state";
+import { useReadNotifications, useRecentSchools } from "@/lib/local-state";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -134,18 +134,7 @@ function ProfilePage() {
         </Panel>
       )}
 
-      <button
-        onClick={() => {
-          if (typeof window !== "undefined" && !window.confirm("Reset EduSpace on this device? Your name, saved schools and history will be removed.")) return;
-          clearAllLocalData();
-          toast.success("App data reset");
-          if (typeof window !== "undefined") window.location.href = "/";
-        }}
-        className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-destructive/10 px-4 py-3.5 text-sm font-semibold text-destructive"
-      >
-        <RotateCcw className="h-4 w-4" /> Reset app data
-      </button>
-      <p className="mt-4 text-center text-[10px] uppercase tracking-widest text-muted-foreground">EduSpace Namibia · v1.0</p>
+      <p className="mt-6 text-center text-[10px] uppercase tracking-widest text-muted-foreground">EduSpace Namibia · v1.0</p>
     </AppShell>
   );
 }

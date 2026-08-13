@@ -55,7 +55,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { title: "EduSpace Namibia — School Placement Availability" },
-      { name: "description", content: "Check real-time school placement availability across all 14 regions of Namibia. An AI-powered service by the Ministry of Education." },
+      { name: "description", content: "Check real-time school placement availability across all 14 regions of Namibia, down to class level." },
       { name: "author", content: "EduSpace Namibia" },
       { name: "theme-color", content: "#0b0f1c" },
       { property: "og:title", content: "EduSpace Namibia — School Placement Availability" },
