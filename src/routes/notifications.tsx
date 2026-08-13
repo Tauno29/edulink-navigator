@@ -37,6 +37,16 @@ function NotificationsPage() {
         </button>
       </div>
 
+      {NOTIFICATIONS.length === 0 && (
+        <div className="mt-16 flex flex-col items-center justify-center text-center">
+          <div className="grid h-20 w-20 place-items-center rounded-full bg-success/10">
+            <Bell className="h-8 w-8 text-success" />
+          </div>
+          <h2 className="mt-4 font-display text-xl font-bold">No alerts yet</h2>
+          <p className="mt-1 max-w-xs text-sm text-muted-foreground">Availability updates and ministry announcements will show up here.</p>
+        </div>
+      )}
+
       <ul className="space-y-2">
         {NOTIFICATIONS.map((n) => {
           const Icon = iconFor[n.type] ?? Bell;
