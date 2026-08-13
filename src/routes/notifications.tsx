@@ -9,9 +9,9 @@ export const Route = createFileRoute("/notifications")({
   head: () => ({
     meta: [
       { title: "Notifications — EduSpace Namibia" },
-      { name: "description", content: "Availability updates, ministry announcements and reminders for school placement in Namibia." },
+      { name: "description", content: "Availability updates, announcements and reminders for school placement in Namibia." },
       { property: "og:title", content: "Notifications — EduSpace Namibia" },
-      { property: "og:description", content: "Availability updates and ministry announcements for school placement in Namibia." },
+      { property: "og:description", content: "Availability updates and announcements for school placement in Namibia." },
     ],
   }),
   component: NotificationsPage,
@@ -43,7 +43,7 @@ function NotificationsPage() {
             <Bell className="h-8 w-8 text-success" />
           </div>
           <h2 className="mt-4 font-display text-xl font-bold">No alerts yet</h2>
-          <p className="mt-1 max-w-xs text-sm text-muted-foreground">Availability updates and ministry announcements will show up here.</p>
+          <p className="mt-1 max-w-xs text-sm text-muted-foreground">Availability updates and announcements will show up here.</p>
         </div>
       )}
 

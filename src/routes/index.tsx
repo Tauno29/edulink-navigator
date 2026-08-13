@@ -54,7 +54,7 @@ function Home() {
             </div>
             <div>
               <p className="text-[11px] uppercase tracking-widest text-muted-foreground">EduSpace Namibia</p>
-              <p className="font-display text-sm font-semibold">Ministry of Education</p>
+              <p className="font-display text-sm font-semibold">School Placement</p>
             </div>
           </div>
           <Link to="/notifications" className="relative grid h-10 w-10 place-items-center rounded-full glass">
@@ -94,7 +94,7 @@ function Home() {
       {/* Stats */}
       <section className="mt-4 grid grid-cols-3 gap-2">
         <StatChip icon={Building2} value={totalSchools.toLocaleString()} label="Schools" />
-        <StatChip icon={Users} value={`${(totalCapacity / 1000).toFixed(0)}k`} label="Capacity" />
+        <StatChip icon={Users} value={totalCapacity >= 1000 ? `${(totalCapacity / 1000).toFixed(0)}k` : `${totalCapacity.toLocaleString()}`} label="Capacity" />
         <StatChip icon={TrendingUp} value={`${totalAvailable.toLocaleString()}`} label="Spaces" />
       </section>
 
@@ -184,9 +184,9 @@ function Home() {
 
       {/* Announcements */}
       <section className="mt-8">
-        <SectionHeader title="Latest announcements" hint="Ministry" />
+        <SectionHeader title="Latest announcements" hint="Updates" />
         {ANNOUNCEMENTS.length === 0 && (
-          <p className="mt-3 rounded-2xl bg-card p-6 text-center text-sm text-muted-foreground shadow-[var(--shadow-card)]">No announcements yet. Ministry updates will appear here.</p>
+          <p className="mt-3 rounded-2xl bg-card p-6 text-center text-sm text-muted-foreground shadow-[var(--shadow-card)]">No announcements yet. Updates will appear here.</p>
         )}
         <ul className="mt-3 space-y-2">
           {ANNOUNCEMENTS.map((a) => (
