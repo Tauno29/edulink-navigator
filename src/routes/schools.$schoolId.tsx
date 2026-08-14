@@ -8,6 +8,7 @@ import { useFavorites } from "@/lib/favorites";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { recordSchoolView } from "@/lib/local-state";
+import { ApplicationFlow } from "@/components/app/ApplicationFlow";
 
 export const Route = createFileRoute("/schools/$schoolId")({
   component: SchoolPage,
@@ -43,6 +44,7 @@ function SchoolPage() {
   const { has, toggle } = useFavorites();
   const [tab, setTab] = useState<(typeof TABS)[number]>("Availability");
   const [openGrade, setOpenGrade] = useState<string | null>(null);
+  const [applyGrade, setApplyGrade] = useState<{ grade: string; waitlist: boolean } | null>(null);
   const saved = has(school.id);
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${school.name}, ${school.address}, Namibia`)}`;
 
@@ -175,6 +177,12 @@ function SchoolPage() {
                               </div>
                             ))}
                           </div>
+                          <button
+                            onClick={() => setApplyGrade({ grade: g.grade, waitlist: av <= 0 })}
+                            className="mt-3 w-full rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-float)] transition active:scale-[0.98]"
+                          >
+                            {av > 0 ? `Apply for ${g.grade}` : "Join waitlist / apply for consideration"}
+                          </button>
                         </motion.ul>
                       )}
                     </AnimatePresence>
@@ -254,6 +262,18 @@ function SchoolPage() {
           </div>
           <p className="text-[11px] text-muted-foreground">Principal: {school.principal}</p>
         </section>
+      )}
+
+      {applyGrade && (
+        <ApplicationFlow
+          open
+          onOpenChange={(v) => { if (!v) setApplyGrade(null); }}
+          schoolId={school.id}
+          schoolName={school.name}
+          grade={applyGrade.grade}
+          isSecondary={school.level !== "Primary"}
+          waitlist={applyGrade.waitlist}
+        />
       )}
     </AppShell>
   );
