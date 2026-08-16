@@ -279,14 +279,11 @@ export function ApplicationFlow(props: Props) {
 function CompletionScreen({ app, onClose }: { app: Application; onClose: () => void }) {
   const [priority, setPriority] = useState(app.has_priority_alerts);
   const [showEft, setShowEft] = useState(false);
+  const [checkout, setCheckout] = useState(false);
 
-  const payCard = () => {
-    toast.loading("Opening PayToday secure checkout…", { id: "pt" });
-    setTimeout(() => {
-      setPriorityAlerts(app.id, true);
-      setPriority(true);
-      toast.success(`N$${PRIORITY_FEE}.00 paid — WhatsApp alerts activated`, { id: "pt" });
-    }, 1200);
+  const activate = () => {
+    setPriorityAlerts(app.id, true);
+    setPriority(true);
   };
 
   return (
@@ -322,9 +319,13 @@ function CompletionScreen({ app, onClose }: { app: Application; onClose: () => v
             <p className="mt-3 font-display text-2xl font-bold">N${PRIORITY_FEE}.00 <span className="text-xs font-medium text-muted-foreground">NAD · one-time</span></p>
 
             <div className="mt-4 space-y-2">
-              <button onClick={payCard} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition active:scale-[0.98]">
-                <CreditCard className="h-4 w-4" /> Pay via PayToday / Card
-              </button>
+              {checkout ? (
+                <CardCheckout app={app} onPaid={activate} onCancel={() => setCheckout(false)} />
+              ) : (
+                <button onClick={() => setCheckout(true)} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition active:scale-[0.98]">
+                  <CreditCard className="h-4 w-4" /> Pay via PayToday / Card
+                </button>
+              )}
               <button onClick={() => setShowEft((v) => !v)} className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-background px-4 py-3 text-sm font-semibold transition active:scale-[0.98]">
                 <Upload className="h-4 w-4" /> Upload EFT proof of payment
               </button>
