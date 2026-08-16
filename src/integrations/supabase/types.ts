@@ -14,7 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      priority_alert_orders: {
+        Row: {
+          amount_cents: number
+          application_ref: string
+          created_at: string
+          currency: string
+          has_priority_alerts: boolean
+          id: string
+          paid_at: string | null
+          provider: string
+          provider_ref: string | null
+          school_name: string | null
+          status: string
+        }
+        Insert: {
+          amount_cents?: number
+          application_ref: string
+          created_at?: string
+          currency?: string
+          has_priority_alerts?: boolean
+          id?: string
+          paid_at?: string | null
+          provider?: string
+          provider_ref?: string | null
+          school_name?: string | null
+          status?: string
+        }
+        Update: {
+          amount_cents?: number
+          application_ref?: string
+          created_at?: string
+          currency?: string
+          has_priority_alerts?: boolean
+          id?: string
+          paid_at?: string | null
+          provider?: string
+          provider_ref?: string | null
+          school_name?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
