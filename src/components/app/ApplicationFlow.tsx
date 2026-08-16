@@ -378,6 +378,107 @@ function CompletionScreen({ app, onClose }: { app: Application; onClose: () => v
 
 const inputCls = "w-full rounded-2xl bg-card px-4 py-3 text-sm shadow-[var(--shadow-card)] outline-none ring-primary/40 focus:ring-2";
 
+function CardCheckout({ app, onPaid, onCancel }: { app: Application; onPaid: () => void; onCancel: () => void }) {
+  const start = useServerFn(startPriorityCheckout);
+  const poll = useServerFn(getPriorityOrder);
+  const sandboxPay = useServerFn(completeSandboxPayment);
+
+  const [loading, setLoading] = useState(true);
+  const [paying, setPaying] = useState(false);
+  const [orderId, setOrderId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [card, setCard] = useState({ number: "", exp: "", cvc: "", name: "" });
+
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    start({
+      data: {
+        applicationRef: app.id,
+        schoolName: app.school_name,
+        returnUrl: typeof window !== "undefined" ? window.location.href : undefined,
+      },
+    })
+      .then((res) => {
+        if (!alive) return;
+        if (res.checkoutUrl) { window.location.href = res.checkoutUrl; return; }
+        setOrderId(res.orderId);
+        setLoading(false);
+      })
+      .catch((e: unknown) => {
+        if (!alive) return;
+        setError(e instanceof Error ? e.message : "Could not start checkout.");
+        setLoading(false);
+      });
+    return () => { alive = false; };
+  }, [app.id, app.school_name, start]);
+
+  const digits = card.number.replace(/\D/g, "");
+  const valid = digits.length >= 15 && /^\d{2}\/\d{2}$/.test(card.exp) && card.cvc.length >= 3 && card.name.trim().length > 1;
+
+  const pay = async () => {
+    if (!orderId) return;
+    setPaying(true);
+    setError(null);
+    try {
+      // Sandbox stands in for the provider; the webhook settles the order in live mode.
+      await sandboxPay({ data: { orderId } });
+      let confirmed = false;
+      for (let i = 0; i < 8 && !confirmed; i++) {
+        const res = await poll({ data: { orderId } });
+        if (res.hasPriorityAlerts) { confirmed = true; break; }
+        await new Promise((r) => setTimeout(r, 500));
+      }
+      if (!confirmed) throw new Error("Payment is still processing. We'll activate alerts as soon as it clears.");
+      onPaid();
+      toast.success(`N$${PRIORITY_FEE}.00 paid — WhatsApp alerts activated`);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Payment failed. Please try again.");
+    } finally {
+      setPaying(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center gap-2 rounded-2xl bg-muted/60 py-6 text-xs text-muted-foreground">
+        <Loader2 className="h-4 w-4 animate-spin" /> Opening secure checkout…
+      </div>
+    );
+  }
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-2 rounded-2xl border border-border bg-background p-4">
+      <div className="flex items-center justify-between">
+        <p className="flex items-center gap-1.5 font-display text-sm font-semibold"><Lock className="h-3.5 w-3.5" /> Card details</p>
+        <span className="rounded-full bg-warning/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-warning">Test mode</span>
+      </div>
+      <input
+        inputMode="numeric" maxLength={19} placeholder="4242 4242 4242 4242" value={card.number}
+        onChange={(e) => setCard((c) => ({ ...c, number: e.target.value.replace(/[^\d\s]/g, "") }))}
+        className={inputCls}
+      />
+      <div className="grid grid-cols-2 gap-2">
+        <input maxLength={5} placeholder="MM/YY" value={card.exp}
+          onChange={(e) => setCard((c) => ({ ...c, exp: e.target.value.replace(/[^\d/]/g, "") }))} className={inputCls} />
+        <input inputMode="numeric" maxLength={4} placeholder="CVC" value={card.cvc}
+          onChange={(e) => setCard((c) => ({ ...c, cvc: e.target.value.replace(/\D/g, "") }))} className={inputCls} />
+      </div>
+      <input maxLength={80} placeholder="Name on card" value={card.name}
+        onChange={(e) => setCard((c) => ({ ...c, name: e.target.value }))} className={inputCls} />
+      {error && <p className="text-[11px] text-destructive">{error}</p>}
+      <button
+        disabled={!valid || paying}
+        onClick={pay}
+        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition active:scale-[0.98] disabled:opacity-40"
+      >
+        {paying ? <><Loader2 className="h-4 w-4 animate-spin" /> Confirming payment…</> : <><ShieldCheck className="h-4 w-4" /> Pay N${PRIORITY_FEE}.00</>}
+      </button>
+      <button onClick={onCancel} className="w-full py-1 text-center text-[11px] text-muted-foreground underline underline-offset-4">Cancel</button>
+    </motion.div>
+  );
+}
+
 function SectionTitle({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div className="pt-1">
