@@ -2,11 +2,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft, Camera, Check, CheckCircle2, CreditCard, FileText, Loader2, Sparkles,
-  Upload, X, Zap, Building2, Home,
+  Upload, X, Zap, Building2, Home, ShieldCheck, Lock,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  startPriorityCheckout, getPriorityOrder, completeSandboxPayment,
+} from "@/lib/payments.functions";
 import {
   newApplicationId, saveApplication, setPriorityAlerts, NAM_BANKS, PRIORITY_FEE,
   type Application, type UploadedDoc,

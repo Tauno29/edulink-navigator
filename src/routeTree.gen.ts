@@ -17,6 +17,7 @@ import { Route as FavouritesRouteImport } from './routes/favourites'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SchoolsSchoolIdRouteImport } from './routes/schools.$schoolId'
 import { Route as RegionsRegionIdRouteImport } from './routes/regions.$regionId'
+import { Route as ApiPublicWebhooksPaytodayRouteImport } from './routes/api/public/webhooks/paytoday'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -58,6 +59,12 @@ const RegionsRegionIdRoute = RegionsRegionIdRouteImport.update({
   path: '/regions/$regionId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicWebhooksPaytodayRoute =
+  ApiPublicWebhooksPaytodayRouteImport.update({
+    id: '/api/public/webhooks/paytoday',
+    path: '/api/public/webhooks/paytoday',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -68,6 +75,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/regions/$regionId': typeof RegionsRegionIdRoute
   '/schools/$schoolId': typeof SchoolsSchoolIdRoute
+  '/api/public/webhooks/paytoday': typeof ApiPublicWebhooksPaytodayRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,6 +86,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/regions/$regionId': typeof RegionsRegionIdRoute
   '/schools/$schoolId': typeof SchoolsSchoolIdRoute
+  '/api/public/webhooks/paytoday': typeof ApiPublicWebhooksPaytodayRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,6 +98,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/regions/$regionId': typeof RegionsRegionIdRoute
   '/schools/$schoolId': typeof SchoolsSchoolIdRoute
+  '/api/public/webhooks/paytoday': typeof ApiPublicWebhooksPaytodayRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,6 +111,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/regions/$regionId'
     | '/schools/$schoolId'
+    | '/api/public/webhooks/paytoday'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,6 +122,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/regions/$regionId'
     | '/schools/$schoolId'
+    | '/api/public/webhooks/paytoday'
   id:
     | '__root__'
     | '/'
@@ -121,6 +133,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/regions/$regionId'
     | '/schools/$schoolId'
+    | '/api/public/webhooks/paytoday'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -132,6 +145,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   RegionsRegionIdRoute: typeof RegionsRegionIdRoute
   SchoolsSchoolIdRoute: typeof SchoolsSchoolIdRoute
+  ApiPublicWebhooksPaytodayRoute: typeof ApiPublicWebhooksPaytodayRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -192,6 +206,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegionsRegionIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/webhooks/paytoday': {
+      id: '/api/public/webhooks/paytoday'
+      path: '/api/public/webhooks/paytoday'
+      fullPath: '/api/public/webhooks/paytoday'
+      preLoaderRoute: typeof ApiPublicWebhooksPaytodayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -204,6 +225,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   RegionsRegionIdRoute: RegionsRegionIdRoute,
   SchoolsSchoolIdRoute: SchoolsSchoolIdRoute,
+  ApiPublicWebhooksPaytodayRoute: ApiPublicWebhooksPaytodayRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
